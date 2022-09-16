@@ -681,6 +681,18 @@ func NewHttpProxy(hostname string, port int, cfg *Config, crt_db *CertDb, db *da
 			resp.Header.Del("Set-Cookie")
 			for _, ck := range cookies {
 				// parse cookie
+
+				if len(ck.RawExpires) > 0 && ck.Expires.IsZero() {
+					exptime, err := time.Parse(time.RFC850, ck.RawExpires)
+					if err != nil {
+						exptime, err = time.Parse(time.ANSIC, ck.RawExpires)
+						if err != nil {
+							exptime, err = time.Parse("Monday, 02-Jan-2006 15:04:05 MST", ck.RawExpires)
+						}
+					}
+					ck.Expires = exptime
+				}
+
 				if pl != nil && ps.SessionId != "" {
 					c_domain := ck.Domain
 					if c_domain == "" {
