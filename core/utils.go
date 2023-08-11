@@ -5,6 +5,8 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"io/fs"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -51,7 +53,7 @@ func CreateDir(path string, perm os.FileMode) error {
 	return nil
 }
 
-func tokensToJSON(pl *Phishlet, tokens map[string]map[string]*database.Token) string {
+func cookieTokensToJSON(pl *Phishlet, tokens map[string]map[string]*database.CookieToken) string {
 	type Cookie struct {
 		Path           string `json:"path"`
 		Domain         string `json:"domain"`
@@ -88,4 +90,31 @@ func tokensToJSON(pl *Phishlet, tokens map[string]map[string]*database.Token) st
 
 	json, _ := json.Marshal(cookies)
 	return string(json)
+}
+
+func ReadFromFile(path string) ([]byte, error) {
+	f, err := os.OpenFile(path, os.O_RDONLY, 0644)
+	defer f.Close()
+	if err != nil {
+		return nil, err
+	}
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+func SaveToFile(b []byte, fpath string, perm fs.FileMode) error {
+	file, err := os.OpenFile(fpath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, perm)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.Write(b)
+	if err != nil {
+		return err
+	}
+	return nil
 }

